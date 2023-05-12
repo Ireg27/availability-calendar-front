@@ -3,7 +3,7 @@ import store from "@/store/store";
 
 export default () => {
     const defaultOptions = {
-        baseURL: 'http://localhost:8000',
+        baseURL: process.env.VUE_APP_API_BASE_URL,
         headers: {
             Accept: 'application/json',
             'Content-type': 'application/json',

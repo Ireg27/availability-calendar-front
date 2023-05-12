@@ -43,7 +43,6 @@ const email = ref('');
 const password = ref('');
 const errors = ref({});
 
-
 const login = async () => {
   try {
     const res = await api().post('api/login', {
