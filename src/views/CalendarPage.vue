@@ -1,29 +1,54 @@
 <template>
-  <div>
-    <p>Count: {{ count }}</p>
-    <p>Double Count: {{ doubleCount }}</p>
-    <button @click="increment">Increment</button>
-    <button @click="decrement">Decrement</button>
-  </div>
+  <VCalendar @changedAvailability="changedAvailability"
+             :unavailableDates="unavailableDates"
+             @changeAllAvailability="changeAllAvailability"
+  />
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useStore } from 'vuex';
+import { ref, onMounted } from 'vue';
+import VCalendar from "@/components/VCalendar";
+import api from "@/plugins/api";
+import store from "@/store/store";
 
-const store = useStore();
+const unavailableDates = ref([]);
 
-const count = computed(() => store.state.count);
-const doubleCount = computed(() => store.getters.doubleCount);
+const changeAllAvailability = async (availabilityStatus, currentMonthYear) => {
+  try {
+    await api().post(`/api/users/${store.getters.userId}/unavailabilities`, {
+      availabilityStatus: availabilityStatus,
+      currentMonthYear: currentMonthYear
+    })
+  } catch (error) {
+    console.log(error)
+  } finally {
+    await fetchUnavailableDates();
+  }
+}
 
-const increment = () => {
-  console.log(store)
-  store.dispatch('increment');
+const changedAvailability = async (date) => {
+  try {
+    await api().put(`/api/users/${store.getters.userId}/unavailability`, {
+      date: date,
+    })
+  } catch (error) {
+    console.log(error)
+  } finally {
+    await fetchUnavailableDates();
+  }
+}
+
+const fetchUnavailableDates = async () => {
+  try {
+    const res = await api().get(`/api/users/${store.getters.userId}/unavailabilities`);
+    unavailableDates.value = res.data;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
-const decrement = () => {
-  store.dispatch('decrement');
-};
-
-
+onMounted(() => {
+  fetchUnavailableDates();
+});
 </script>
+
